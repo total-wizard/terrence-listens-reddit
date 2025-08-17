@@ -7,6 +7,7 @@ COPY package*.json ./
 RUN npm install --omit=dev
 
 COPY src/ ./src/
+COPY config.json ./
 
 EXPOSE 8080
 
