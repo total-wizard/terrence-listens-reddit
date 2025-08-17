@@ -1,3 +1,8 @@
+# fly.toml app configuration file generated for terrence-listens on 2025-08-17T10:05:49-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
 app = 'terrence-listens'
 primary_region = 'ord'
 
@@ -9,7 +14,7 @@ primary_region = 'ord'
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = false
+  auto_stop_machines = 'off'
   auto_start_machines = true
   min_machines_running = 1
 
