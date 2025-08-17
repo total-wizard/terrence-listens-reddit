@@ -1,0 +1,27 @@
+{
+  "name": "terrence-listens",
+  "version": "1.0.0",
+  "description": "A fly.io service that polls Reddit RSS feeds and logs content to Supabase",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "node-cron": "^3.0.3",
+    "rss-parser": "^3.13.0",
+    "dotenv": "^16.3.1",
+    "openai": "^4.0.0"
+  },
+  "keywords": [
+    "reddit",
+    "rss",
+    "supabase",
+    "fly.io",
+    "polling"
+  ],
+  "author": "total-wizard",
+  "license": "MIT"
+}

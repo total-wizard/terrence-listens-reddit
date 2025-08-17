@@ -1,0 +1,1 @@
+We're building a fly.io service that polls certain Reddit RSS feeds an logs the content in supabase for further analysis. The project needs to be integrated and pushed to github (account: total-wizard) which will auto-deploy to fly.io (already associated with the github account).
