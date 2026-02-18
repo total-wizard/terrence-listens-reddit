@@ -20,7 +20,9 @@ class RSSService {
 
   async fetchFeed(subreddit) {
     const cleanSubreddit = subreddit.replace(/^\/r\/|^\//, '');
-    const url = `${this.baseUrl}?subreddit=${cleanSubreddit}&size=25&sort=desc&sort_type=created_utc`;
+    // Only fetch posts from the last 20 minutes (slightly wider than the 15-min poll interval)
+    const after = Math.floor(Date.now() / 1000) - (20 * 60);
+    const url = `${this.baseUrl}?subreddit=${cleanSubreddit}&size=25&sort=desc&sort_type=created_utc&after=${after}`;
 
     try {
       console.log(`Fetching feed: ${url}`);
