@@ -97,6 +97,7 @@ class TerrenceListens {
       // Comment Marketing Pipeline (stateless: RSS → LLM → Slack)
       if (process.env.SLACK_WEBHOOK_URL) {
         const commentMarketing = new CommentMarketingService();
+        await commentMarketing.startup();
         await commentMarketing.poll();
 
         cron.schedule('*/15 * * * *', async () => {

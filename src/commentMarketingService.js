@@ -32,6 +32,10 @@ class CommentMarketingService {
     }
   }
 
+  async startup() {
+    await this.slack.sendStartupPing();
+  }
+
   async poll() {
     try {
       console.log(`\n[${new Date().toISOString()}] [CommentMarketing] Starting poll...`);

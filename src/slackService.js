@@ -7,6 +7,32 @@ class SlackService {
     }
   }
 
+  async sendStartupPing() {
+    const message = {
+      text: `Terrence Listens comment marketing pipeline is online. Monitoring ${new Date().toISOString()}`
+    };
+
+    try {
+      const response = await fetch(this.webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(message)
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        console.error(`Slack startup ping failed (${response.status}): ${body}`);
+        return false;
+      }
+
+      console.log('[CommentMarketing] Startup ping sent to Slack');
+      return true;
+    } catch (error) {
+      console.error('Slack startup ping error:', error.message);
+      return false;
+    }
+  }
+
   async sendMatch(post, evaluation) {
     const subreddit = post.feedTitle || 'Unknown';
     const title = post.title || 'No title';
