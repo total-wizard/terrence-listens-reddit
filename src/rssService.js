@@ -1,15 +1,6 @@
 class RSSService {
   constructor() {
-    this.headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.5'
-    };
-  }
-
-  buildRedditJsonUrl(subreddit) {
-    const cleanSubreddit = subreddit.replace(/^\/r\/|^\//, '');
-    return `https://old.reddit.com/r/${cleanSubreddit}.json?limit=25`;
+    this.baseUrl = 'https://api.pullpush.io/reddit/search/submission/';
   }
 
   async fetchSubreddits(subreddits) {
@@ -20,48 +11,51 @@ class RSSService {
       if (feedData) {
         results.push(feedData);
       }
-      // Delay between requests to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // PullPush rate limit: 15 req/min soft, 30 req/min hard
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
 
     return results;
   }
 
   async fetchFeed(subreddit) {
-    const url = this.buildRedditJsonUrl(subreddit);
+    const cleanSubreddit = subreddit.replace(/^\/r\/|^\//, '');
+    const url = `${this.baseUrl}?subreddit=${cleanSubreddit}&size=25&sort=desc&sort_type=created_utc`;
+
     try {
       console.log(`Fetching feed: ${url}`);
-      const response = await fetch(url, {
-        headers: this.headers,
-        redirect: 'follow'
-      });
+      const response = await fetch(url);
 
       if (!response.ok) {
-        console.error(`Error fetching ${url}: Status code ${response.status}`);
+        console.error(`Error fetching ${cleanSubreddit}: Status code ${response.status}`);
         return null;
       }
 
       const data = await response.json();
-      const posts = data?.data?.children || [];
+      const posts = data?.data || [];
+
+      if (posts.length === 0) {
+        console.log(`No posts found for r/${cleanSubreddit}`);
+        return null;
+      }
+
+      console.log(`Fetched ${posts.length} posts from r/${cleanSubreddit}`);
 
       return {
-        feedTitle: subreddit,
+        feedTitle: cleanSubreddit,
         feedUrl: url,
-        items: posts.map(post => {
-          const p = post.data;
-          return {
-            id: p.id || p.permalink,
-            title: p.title,
-            link: `https://www.reddit.com${p.permalink}`,
-            author: p.author,
-            pubDate: p.created_utc ? new Date(p.created_utc * 1000).toISOString() : null,
-            content: p.selftext || '',
-            contentSnippet: (p.selftext || '').substring(0, 500)
-          };
-        })
+        items: posts.map(p => ({
+          id: p.id || p.permalink,
+          title: p.title || '',
+          link: p.permalink ? `https://www.reddit.com${p.permalink}` : p.url || '',
+          author: p.author || '',
+          pubDate: p.created_utc ? new Date(p.created_utc * 1000).toISOString() : null,
+          content: p.selftext || '',
+          contentSnippet: (p.selftext || '').substring(0, 500)
+        }))
       };
     } catch (error) {
-      console.error(`Error fetching feed ${url}:`, error.message);
+      console.error(`Error fetching feed for r/${cleanSubreddit}:`, error.message);
       return null;
     }
   }
