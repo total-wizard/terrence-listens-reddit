@@ -5,6 +5,9 @@ class RSSService {
     this.parser = new Parser({
       customFields: {
         item: ['author', 'id', 'link', 'pubDate', 'title', 'content']
+      },
+      headers: {
+        'User-Agent': 'TerrenceListens/1.0 (RSS Feed Reader)'
       }
     });
   }
