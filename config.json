@@ -1,11 +1,23 @@
 {
   "subreddits": [
     "mildlyinfuriating",
-    "productivity", 
+    "productivity",
     "firstworldproblems",
     "entrepreneur",
     "doesanyoneelse",
     "showerthoughts",
     "crappydesign"
+  ],
+  "commentMarketingSubreddits": [
+    "ADHD",
+    "adhdwomen",
+    "productivity",
+    "depression",
+    "getdisciplined",
+    "getmotivated",
+    "ExecutiveFunction",
+    "neurodiversity",
+    "anxietyhelp",
+    "overwhelmed"
   ]
 }

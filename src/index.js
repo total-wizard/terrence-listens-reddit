@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import RSSService from './rssService.js';
 import SupabaseService from './supabaseService.js';
 import LLMFilter from './llmFilter.js';
+import CommentMarketingService from './commentMarketingService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -92,7 +93,24 @@ class TerrenceListens {
       });
       
       console.log('🚀 Service is running! Polling every 15 minutes.');
-      
+
+      // Comment Marketing Pipeline (stateless: RSS → LLM → Slack)
+      if (process.env.SLACK_WEBHOOK_URL) {
+        const commentMarketing = new CommentMarketingService();
+        await commentMarketing.poll();
+
+        cron.schedule('*/15 * * * *', async () => {
+          await commentMarketing.poll();
+        }, {
+          scheduled: true,
+          timezone: "UTC"
+        });
+
+        console.log('📣 Comment marketing pipeline is running!');
+      } else {
+        console.log('⚠️ SLACK_WEBHOOK_URL not set — comment marketing pipeline disabled');
+      }
+
     } catch (error) {
       console.error('Failed to start service:', error);
       process.exit(1);
