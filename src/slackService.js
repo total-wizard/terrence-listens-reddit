@@ -91,6 +91,13 @@ class SlackService {
           ]
         },
         {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: 'cc: <!channel>'
+          }
+        },
+        {
           type: 'divider'
         }
       ]
