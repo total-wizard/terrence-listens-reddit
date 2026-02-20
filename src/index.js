@@ -100,7 +100,8 @@ class TerrenceListens {
         await commentMarketing.startup();
         await commentMarketing.poll();
 
-        cron.schedule('*/15 * * * *', async () => {
+        // Offset by 7 minutes from the business ideas pipeline to avoid overlapping OpenRSS requests
+        cron.schedule('7,22,37,52 * * * *', async () => {
           await commentMarketing.poll();
         }, {
           scheduled: true,

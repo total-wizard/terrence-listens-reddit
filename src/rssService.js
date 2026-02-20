@@ -22,7 +22,8 @@ class RSSService {
       if (feedData) {
         results.push(feedData);
       }
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 5s delay between requests to avoid OpenRSS 429 rate limiting
+      await new Promise(resolve => setTimeout(resolve, 5000));
     }
 
     return results;
