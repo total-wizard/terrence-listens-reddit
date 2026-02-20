@@ -1,6 +1,8 @@
 class RSSService {
   constructor() {
     this.baseUrl = 'https://api.pullpush.io/reddit/search/submission/';
+    // Track seen post IDs to avoid re-processing across poll cycles
+    this.seenPostIds = new Set();
   }
 
   async fetchSubreddits(subreddits) {
@@ -20,16 +22,16 @@ class RSSService {
 
   async fetchFeed(subreddit) {
     const cleanSubreddit = subreddit.replace(/^\/r\/|^\//, '');
-    // Only fetch posts from the last 20 minutes (slightly wider than the 15-min poll interval)
-    const after = Math.floor(Date.now() / 1000) - (20 * 60);
+    // Look back 6 hours — PullPush has ingestion delay so recent posts take time to appear
+    const after = Math.floor(Date.now() / 1000) - (6 * 60 * 60);
     const url = `${this.baseUrl}?subreddit=${cleanSubreddit}&size=25&sort=desc&sort_type=created_utc&after=${after}`;
 
     try {
-      console.log(`Fetching feed: ${url}`);
+      console.log(`Fetching feed: r/${cleanSubreddit}`);
       const response = await fetch(url);
 
       if (!response.ok) {
-        console.error(`Error fetching ${cleanSubreddit}: Status code ${response.status}`);
+        console.error(`Error fetching r/${cleanSubreddit}: Status code ${response.status}`);
         return null;
       }
 
@@ -41,12 +43,28 @@ class RSSService {
         return null;
       }
 
-      console.log(`Fetched ${posts.length} posts from r/${cleanSubreddit}`);
+      // Filter out posts we've already processed
+      const newPosts = posts.filter(p => !this.seenPostIds.has(p.id));
+
+      // Mark these posts as seen
+      newPosts.forEach(p => this.seenPostIds.add(p.id));
+
+      // Cap the seen set at 10,000 to prevent unbounded memory growth
+      if (this.seenPostIds.size > 10000) {
+        const entries = [...this.seenPostIds];
+        this.seenPostIds = new Set(entries.slice(-5000));
+      }
+
+      console.log(`r/${cleanSubreddit}: ${posts.length} fetched, ${newPosts.length} new`);
+
+      if (newPosts.length === 0) {
+        return null;
+      }
 
       return {
         feedTitle: cleanSubreddit,
         feedUrl: url,
-        items: posts.map(p => ({
+        items: newPosts.map(p => ({
           id: p.id || p.permalink,
           title: p.title || '',
           link: p.permalink ? `https://www.reddit.com${p.permalink}` : p.url || '',
